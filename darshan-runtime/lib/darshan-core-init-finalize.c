@@ -111,6 +111,32 @@ __attribute__((destructor)) void serial_finalize(void)
         darshan_core_shutdown();
     return;
 }
+
+void (*__real__exit)(int) __attribute__ ((noreturn));
+void _exit(int status)
+{
+    char *no_mpi;
+
+    MAP_OR_FAIL(_exit);
+    no_mpi = getenv(DARSHAN_ENABLE_NONMPI);
+    if (no_mpi)
+        darshan_core_shutdown();
+
+	__real__exit(status);
+}
+
+DARSHAN_FORWARD_DECL(exit_group, void, (int));
+void exit_group(int status)
+{
+    char *no_mpi;
+
+    MAP_OR_FAIL(exit_group);
+    no_mpi = getenv(DARSHAN_ENABLE_NONMPI);
+    if (no_mpi)
+        darshan_core_shutdown();
+
+	__real_exit_group(status);
+}
 #endif
 
 /*
