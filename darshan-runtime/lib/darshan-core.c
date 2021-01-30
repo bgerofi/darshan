@@ -29,6 +29,7 @@
 #include <sys/vfs.h>
 #include <zlib.h>
 #include <assert.h>
+#include <errno.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>
@@ -1576,8 +1577,11 @@ static int darshan_log_open(char *logfile_name, struct darshan_core_runtime *cor
 
     /* open the darshan log file for writing */
     log_fh->nompi_fd = open(logfile_name, O_CREAT | O_WRONLY | O_EXCL, S_IRUSR);
-    if(log_fh->nompi_fd < 0)
+    if(log_fh->nompi_fd < 0) {
+        fprintf(stderr, "%s(): error opening %s: %s\n",
+                __func__, logfile_name, strerror(errno));
         return(-1);
+	}
     return(0);
 }
 
