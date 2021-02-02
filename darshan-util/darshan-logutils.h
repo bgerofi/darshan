@@ -20,7 +20,7 @@
 /* Maximum size of a record - Lustre OST lists can get huge, but 81920 is enough
  * for 10K OSTs 
  */
-#define DEF_MOD_BUF_SIZE 81920
+#define DEF_MOD_BUF_SIZE 1048576
 
 struct darshan_fd_int_state;
 
