@@ -77,7 +77,7 @@
 #endif
 
 /* default number of records to attempt to store for each module */
-#define DARSHAN_DEF_MOD_REC_COUNT 1024
+#define DARSHAN_DEF_MOD_REC_COUNT 262144
 
 #ifdef HAVE_MPI
 /*

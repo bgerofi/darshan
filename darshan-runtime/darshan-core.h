@@ -55,8 +55,8 @@
 #define DARSHAN_MOD_MEM_MAX (2 * 1024 * 1024) /* 2 MiB default */
 #endif
 
-/* default name record buf can store 2048 records of size 100 bytes */
-#define DARSHAN_NAME_RECORD_BUF_SIZE (2048 * 100)
+/* default name record buf can store 262144 records of size 100 bytes */
+#define DARSHAN_NAME_RECORD_BUF_SIZE (262144 * 100)
 
 typedef union
 {

@@ -303,17 +303,28 @@ void darshan_core_initialize(int argc, char **argv)
         /* TODO: do we alloc new memory as we go or just do everything up front? */
 
 #ifndef __DARSHAN_ENABLE_MMAP_LOGS
+        /* mmap() log_mod_p so that it can be faulted in on demand */
+        init_core->log_mod_p = mmap(NULL, darshan_mod_mem_quota,
+                PROT_READ | PROT_WRITE,
+                MAP_PRIVATE | MAP_ANONYMOUS,
+                -1, 0);
+
+        if (init_core->log_mod_p == MAP_FAILED) {
+            free(init_core);
+            printf("error: mapping log_mod_p\n");
+            return;
+        }
+
         /* just allocate memory for each log file region */
         init_core->log_hdr_p = malloc(sizeof(struct darshan_header));
         init_core->log_job_p = malloc(sizeof(struct darshan_job));
         init_core->log_exemnt_p = malloc(DARSHAN_EXE_LEN+1);
         init_core->log_name_p = malloc(DARSHAN_NAME_RECORD_BUF_SIZE);
-        init_core->log_mod_p = malloc(darshan_mod_mem_quota);
 
         if(!(init_core->log_hdr_p) || !(init_core->log_job_p) ||
-           !(init_core->log_exemnt_p) || !(init_core->log_name_p) ||
-           !(init_core->log_mod_p))
+           !(init_core->log_exemnt_p) || !(init_core->log_name_p))
         {
+            munmap(init_core->log_mod_p, darshan_mod_mem_quota);
             free(init_core);
             return;
         }
@@ -322,7 +333,6 @@ void darshan_core_initialize(int argc, char **argv)
         memset(init_core->log_job_p, 0, sizeof(struct darshan_job));
         memset(init_core->log_exemnt_p, 0, DARSHAN_EXE_LEN+1);
         memset(init_core->log_name_p, 0, DARSHAN_NAME_RECORD_BUF_SIZE);
-        memset(init_core->log_mod_p, 0, darshan_mod_mem_quota);
 #else
         /* if mmap logs are enabled, we need to initialize the mmap region
          * before setting the corresponding log file region pointers
@@ -2064,7 +2074,7 @@ static void darshan_core_cleanup(struct darshan_core_runtime* core)
     free(core->log_job_p);
     free(core->log_exemnt_p);
     free(core->log_name_p);
-    free(core->log_mod_p);
+    munmap(core->log_mod_p, darshan_mod_mem_quota);
 #endif
 
 #ifdef HAVE_MPI
